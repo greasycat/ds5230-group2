@@ -19,8 +19,17 @@ CAR_CATEGORICAL_COLUMNS = [
     'cylinders',
 ]
 
+CUSTOMER_NUMERIC_COLUMNS = [
+    'Age',
+    'Annual Income (k$)',
+    'Spending Score (1-100)'
+]
 
-def plot_pca(pca_result):
+CUSTOMER_CATEGORICAL_COLUMNS = [
+    'Gender'
+]
+
+def plot_pca(pca_result, fig_suffix):
     # check if less than 3 components
     if pca_result.shape[1] < 3:
         print("PCA result has less than 3 components, skipping plot")
@@ -31,7 +40,7 @@ def plot_pca(pca_result):
     plt.xlabel('PCA Component 1')
     plt.ylabel('PCA Component 2')
     plt.title('PCA of Car Data')
-    plt.savefig('pca_plot.png')
+    plt.savefig(f'pca_plot_{fig_suffix}.png')
 
 
 class Prep:
@@ -40,22 +49,23 @@ class Prep:
         self.customer_data_path = "data/customer.csv" if customer_data_path is None else customer_data_path
 
         # set random seed
-        np.random.seed(random_seed)
+        self.random_seed = random_seed
         
         self.output_pca = output_pca
 
         self._prep_car_data()
+        self._prep_customer_data()
 
     
     def _prep_car_data(self):
         self.raw_car = pd.read_csv(self.car_data_path, sep=";")
         self._clean_car_data()
-        pca_result = self._pca(self.car[CAR_NUMERIC_COLUMNS])
+        pca_result = self._pca(self.car[CAR_NUMERIC_COLUMNS], "car")
         one_hot_encoded = self._one_hot_encode(self.car[CAR_CATEGORICAL_COLUMNS])
         self.prep_car = pd.concat([pca_result, one_hot_encoded], axis=1)
 
     def _clean_car_data(self):
-        self.car = self.raw_car.sample(frac=0.2)
+        self.car = self.raw_car.sample(frac=0.2, random_state=self.random_seed)
 
         # fill NAs with "EV or Others" for categorical columns
         for column in CAR_CATEGORICAL_COLUMNS:
@@ -67,7 +77,7 @@ class Prep:
         # convert cylinders to str
         self.car['cylinders'] = self.car['cylinders'].astype(str)
 
-    def _pca(self, data):
+    def _pca(self, data, fig_suffix):
         scaler = StandardScaler()
         scaled = scaler.fit_transform(data)
 
@@ -93,7 +103,7 @@ class Prep:
             plt.axvline(x=n_components_95, color='g', linestyle='--', label=f'{n_components_95} Components')
             plt.legend()
             plt.grid(True)
-            plt.savefig('pca_variance_plot.png')
+            plt.savefig(f'pca_variance_plot_{fig_suffix}.png')
 
         # Refit PCA with optimal number of components
         pca = PCA(n_components=n_components_95)
@@ -101,7 +111,7 @@ class Prep:
         pca_result = pd.DataFrame(pca_result)
 
         if self.output_pca:
-            plot_pca(pca_result)
+            plot_pca(pca_result, fig_suffix)
 
         return pca_result
     
@@ -111,6 +121,11 @@ class Prep:
         one_hot_encoded = pd.DataFrame(one_hot_encoded)
         return one_hot_encoded
 
+    def _prep_customer_data(self):
+        self.raw_customer = pd.read_csv(self.customer_data_path)
 
-    def _clean_customer_data(self):
-        pass
+        pca_result = self._pca(self.raw_customer[CUSTOMER_NUMERIC_COLUMNS], "customer")
+        one_hot_encoded = self._one_hot_encode(self.raw_customer[CUSTOMER_CATEGORICAL_COLUMNS])
+        self.prep_customer = pd.concat([pca_result, one_hot_encoded], axis=1)
+
+
