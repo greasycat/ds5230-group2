@@ -40,7 +40,7 @@ def plot_pca(pca_result, fig_suffix):
     plt.xlabel('PCA Component 1')
     plt.ylabel('PCA Component 2')
     plt.title('PCA of Car Data')
-    plt.savefig(f'pca_plot_{fig_suffix}.png')
+    plt.savefig(f'figs/pca_plot_{fig_suffix}.png')
 
 
 class Prep:
@@ -55,7 +55,7 @@ class Prep:
 
         self._prep_car_data()
         self._prep_customer_data()
-
+    
     
     def _prep_car_data(self):
         self.raw_car = pd.read_csv(self.car_data_path, sep=";")
@@ -103,7 +103,7 @@ class Prep:
             plt.axvline(x=n_components_95, color='g', linestyle='--', label=f'{n_components_95} Components')
             plt.legend()
             plt.grid(True)
-            plt.savefig(f'pca_variance_plot_{fig_suffix}.png')
+            plt.savefig(f'figs/pca_variance_plot_{fig_suffix}.png')
 
         # Refit PCA with optimal number of components
         pca = PCA(n_components=n_components_95)
