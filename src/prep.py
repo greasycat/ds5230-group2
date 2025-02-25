@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.decomposition import PCA
+from pandas import DataFrame
 
 CAR_NUMERIC_COLUMNS =[
     'highway08',

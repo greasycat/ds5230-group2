@@ -1,6 +1,7 @@
 from sklearn.cluster import SpectralCoclustering
 from sklearn.metrics import silhouette_score, davies_bouldin_score, calinski_harabasz_score
 from itertools import product
+from copy import deepcopy
 import matplotlib.pyplot as plt
 
 # define the parameter grid
@@ -16,17 +17,17 @@ def calinski_harabasz_score_spectral_metric(data, fit):
     return calinski_harabasz_score(data, fit.row_labels_)
 
 
-def hyperparam_search(data, model, param_grid, metrics_dict):
+def hyperparam_search(data, model, param_grid, metrics_dict, label_getter):
     scores = {}
 
     for params in product(*param_grid.values()):
         model.set_params(**dict(zip(param_grid.keys(), params)))
-        model.fit(data)
+        fit = model.fit(data)
         for metric_name, metric in metrics_dict.items():
-            score = metric(data, model)
+            score = metric(data, fit)
             if metric_name not in scores:
                 scores[metric_name] = []
-            scores[metric_name].append((score, model, params))
+            scores[metric_name].append((score, label_getter(fit), params))
             print(f"Score: {score}, Params: {params}, Metric: {metric_name}")
 
     # sort the scores
@@ -41,7 +42,7 @@ def spectral_clustering(data, param_grid, random_seed=42):
         "davies_bouldin_score": davies_bouldin_score_spectral_metric,
         "calinski_harabasz_score": calinski_harabasz_score_spectral_metric
     }
-    return hyperparam_search(data, model, param_grid, metrics_dict)
+    return hyperparam_search(data, model, param_grid, metrics_dict, lambda fit: (fit.row_labels_, fit.column_labels_))
 
 def plot_clustering_on_pca_spectral(data, fit, name):
     fig, ax = plt.subplots()
