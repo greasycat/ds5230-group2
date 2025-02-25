@@ -46,7 +46,7 @@ def plot_pca(pca_result, fig_suffix):
 class Prep:
     def __init__(self, car_data_path=None, customer_data_path=None, random_seed=42, output_pca=False):
         self.car_data_path = "data/car.csv" if car_data_path is None else car_data_path
-        self.customer_data_path = "data/customer.csv" if customer_data_path is None else customer_data_path
+        self.customer_data_path = "data/Mall_Customers.csv" if customer_data_path is None else customer_data_path
 
         # set random seed
         self.random_seed = random_seed
