@@ -3,9 +3,6 @@ DATA_DIR = data
 all:
 	python main.py -B
 
-cache:
-	python main.py -B --cached
-
 
 data: $(DATA_DIR)/car.csv $(DATA_DIR)/customer.csv
 	

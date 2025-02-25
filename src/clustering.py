@@ -1,5 +1,5 @@
 from sklearn.cluster import SpectralCoclustering
-from sklearn.metrics import silhouette_score
+from sklearn.metrics import silhouette_score, davies_bouldin_score, calinski_harabasz_score
 from itertools import product
 import matplotlib.pyplot as plt
 
@@ -9,25 +9,39 @@ import matplotlib.pyplot as plt
 def silhouette_score_spectral_metric(data, fit):
     return silhouette_score(data, fit.row_labels_)
 
+def davies_bouldin_score_spectral_metric(data, fit):
+    return davies_bouldin_score(data, fit.row_labels_)
 
-def hyperparam_search(data, model, param_grid, metric):
-    scores = []
+def calinski_harabasz_score_spectral_metric(data, fit):
+    return calinski_harabasz_score(data, fit.row_labels_)
+
+
+def hyperparam_search(data, model, param_grid, metrics_dict):
+    scores = {}
 
     for params in product(*param_grid.values()):
         model.set_params(**dict(zip(param_grid.keys(), params)))
         model.fit(data)
-        score = metric(data, model)
-        scores.append((score, model, params))
-        print(f"Score: {score}, Params: {params}")
+        for metric_name, metric in metrics_dict.items():
+            score = metric(data, model)
+            if metric_name not in scores:
+                scores[metric_name] = []
+            scores[metric_name].append((score, model, params))
+            print(f"Score: {score}, Params: {params}, Metric: {metric_name}")
 
     # sort the scores
-    scores.sort(key=lambda x: x[0], reverse=True)
+    for metric_name in scores:
+        scores[metric_name].sort(key=lambda x: x[0], reverse=True)
     return scores
 
 def spectral_clustering(data, param_grid, random_seed=42):
     model = SpectralCoclustering(random_state=random_seed)
-    metric = silhouette_score_spectral_metric
-    return hyperparam_search(data, model, param_grid, metric)
+    metrics_dict = {
+        "silhouette_score": silhouette_score_spectral_metric,
+        "davies_bouldin_score": davies_bouldin_score_spectral_metric,
+        "calinski_harabasz_score": calinski_harabasz_score_spectral_metric
+    }
+    return hyperparam_search(data, model, param_grid, metrics_dict)
 
 def plot_clustering_on_pca_spectral(data, fit, name):
     fig, ax = plt.subplots()
