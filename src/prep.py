@@ -3,13 +3,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.decomposition import PCA
-from pandas import DataFrame
 
 CAR_NUMERIC_COLUMNS =[
     'highway08',
     'city08',
     'displ',
-    'year'
+    'year',
+    'cylinders',
 ]
 
 CAR_CATEGORICAL_COLUMNS = [
@@ -17,8 +17,8 @@ CAR_CATEGORICAL_COLUMNS = [
     'drive',
     'trany',
     'vclass',
-    'cylinders',
 ]
+
 
 CUSTOMER_NUMERIC_COLUMNS = [
     'Age',
@@ -126,7 +126,7 @@ class Prep:
             self.car[column] = self.car[column].fillna(0)
 
         # convert cylinders to str
-        self.car['cylinders'] = self.car['cylinders'].astype(str)
+        # self.car['cylinders'] = self.car['cylinders'].astype(str)
 
     def _pca(self, data, fig_suffix, features):
         scaler = StandardScaler()
